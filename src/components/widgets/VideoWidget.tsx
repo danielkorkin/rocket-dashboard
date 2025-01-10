@@ -1,14 +1,56 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactPlayer from "react-player";
 
-const VideoWidget = ({
+interface VideoWidgetProps {
+	videoUrl?: string;
+}
+
+const VideoWidget: React.FC<VideoWidgetProps> = ({
 	videoUrl = "https://www.youtube.com/watch?v=21X5lGlDOfg",
 }) => {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [dimensions, setDimensions] = useState({
+		width: "100%",
+		height: "100%",
+	});
+
+	useEffect(() => {
+		const updateDimensions = () => {
+			if (containerRef.current) {
+				setDimensions({
+					width: `${containerRef.current.offsetWidth}px`,
+					height: `${containerRef.current.offsetHeight}px`,
+				});
+			}
+		};
+
+		updateDimensions();
+		window.addEventListener("resize", updateDimensions);
+
+		const resizeObserver = new ResizeObserver(updateDimensions);
+		if (containerRef.current) {
+			resizeObserver.observe(containerRef.current);
+		}
+
+		return () => {
+			window.removeEventListener("resize", updateDimensions);
+			resizeObserver.disconnect();
+		};
+	}, []);
+
 	return (
-		<div className="w-full h-full">
-			<ReactPlayer url={videoUrl} width="100%" height="100%" controls />
+		<div ref={containerRef} className="w-full h-full">
+			{typeof window !== "undefined" && (
+				<ReactPlayer
+					url={videoUrl}
+					width={dimensions.width}
+					height={dimensions.height}
+					controls
+					style={{ position: "absolute", top: 0, left: 0 }}
+				/>
+			)}
 		</div>
 	);
 };

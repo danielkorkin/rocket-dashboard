@@ -6,18 +6,33 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings, X } from "lucide-react";
 
-const VideoWidget = dynamic(() => import("@/components/widgets/VideoWidget"));
-const GaugeWidget = dynamic(() => import("@/components/widgets/GaugeWidget"));
-const ChartWidget = dynamic(() => import("@/components/widgets/ChartWidget"));
-const WidgetEditor = dynamic(() => import("@/components/WidgetEditor"));
+const VideoWidget = dynamic(() => import("./widgets/VideoWidget"));
+const GaugeWidget = dynamic(() => import("./widgets/GaugeWidget"));
+const ChartWidget = dynamic(() => import("./widgets/ChartWidget"));
+const WidgetEditor = dynamic(() => import("./WidgetEditor"));
 
-const WidgetContainer = ({ widget, onRemove, onUpdate }) => {
+interface WidgetContainerProps {
+	widget: {
+		id: string;
+		type: string;
+		title: string;
+		videoUrl?: string;
+	};
+	onRemove: () => void;
+	onUpdate: (newProps: any) => void;
+}
+
+const WidgetContainer: React.FC<WidgetContainerProps> = ({
+	widget,
+	onRemove,
+	onUpdate,
+}) => {
 	const [isEditing, setIsEditing] = useState(false);
 
 	const renderWidget = () => {
 		switch (widget.type) {
 			case "video":
-				return <VideoWidget {...widget} />;
+				return <VideoWidget videoUrl={widget.videoUrl} />;
 			case "gauge":
 				return <GaugeWidget {...widget} />;
 			case "chart":
@@ -28,7 +43,7 @@ const WidgetContainer = ({ widget, onRemove, onUpdate }) => {
 	};
 
 	return (
-		<Card className="h-full">
+		<Card className="h-full flex flex-col">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 				<CardTitle className="text-sm font-medium">
 					{widget.title}
@@ -37,16 +52,30 @@ const WidgetContainer = ({ widget, onRemove, onUpdate }) => {
 					<Button
 						variant="ghost"
 						size="icon"
-						onClick={() => setIsEditing(true)}
+						onClick={(e) => {
+							e.stopPropagation();
+							setIsEditing(true);
+						}}
+						onMouseDown={(e) => e.stopPropagation()}
 					>
 						<Settings className="h-4 w-4" />
 					</Button>
-					<Button variant="ghost" size="icon" onClick={onRemove}>
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={(e) => {
+							e.stopPropagation();
+							onRemove();
+						}}
+						onMouseDown={(e) => e.stopPropagation()}
+					>
 						<X className="h-4 w-4" />
 					</Button>
 				</div>
 			</CardHeader>
-			<CardContent>{renderWidget()}</CardContent>
+			<CardContent className="flex-grow relative">
+				{renderWidget()}
+			</CardContent>
 			{isEditing && (
 				<WidgetEditor
 					widget={widget}
