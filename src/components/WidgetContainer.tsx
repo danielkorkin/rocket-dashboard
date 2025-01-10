@@ -10,6 +10,11 @@ const VideoWidget = dynamic(() => import("./widgets/VideoWidget"));
 const GaugeWidget = dynamic(() => import("./widgets/GaugeWidget"));
 const ChartWidget = dynamic(() => import("./widgets/ChartWidget"));
 const WidgetEditor = dynamic(() => import("./WidgetEditor"));
+const RollRateWidget = dynamic(() => import("./widgets/RollRateWidget"));
+const HeadingWidget = dynamic(() => import("./widgets/HeadingWidget"));
+const LiveClockWidget = dynamic(() => import("./widgets/LiveClockWidget"));
+const NumberWidget = dynamic(() => import("./widgets/NumberWidget"));
+const TimerWidget = dynamic(() => import("./widgets/TimerWidget"));
 
 interface WidgetContainerProps {
 	widget: {
@@ -17,6 +22,12 @@ interface WidgetContainerProps {
 		type: string;
 		title: string;
 		videoUrl?: string;
+		source?: string;
+		unit?: string;
+		timezone?: string;
+		startDate?: string;
+		startTime?: string;
+		timerTimezone?: string;
 	};
 	onRemove: () => void;
 	onUpdate: (newProps: any) => void;
@@ -28,6 +39,22 @@ const WidgetContainer: React.FC<WidgetContainerProps> = ({
 	onUpdate,
 }) => {
 	const [isEditing, setIsEditing] = useState(false);
+	const [isTimerRunning, setIsTimerRunning] = useState(false);
+	const [timerStartTime, setTimerStartTime] = useState<Date | null>(null);
+
+	const handleTimerStart = () => {
+		setIsTimerRunning(true);
+		setTimerStartTime(new Date());
+	};
+
+	const handleTimerStop = () => {
+		setIsTimerRunning(false);
+	};
+
+	const handleTimerReset = () => {
+		setIsTimerRunning(false);
+		setTimerStartTime(null);
+	};
 
 	const renderWidget = () => {
 		switch (widget.type) {
@@ -37,6 +64,26 @@ const WidgetContainer: React.FC<WidgetContainerProps> = ({
 				return <GaugeWidget {...widget} />;
 			case "chart":
 				return <ChartWidget {...widget} />;
+			case "rollRate":
+				return <RollRateWidget />;
+			case "heading":
+				return <HeadingWidget />;
+			case "clock":
+				return <LiveClockWidget timezone={widget.timezone || "UTC"} />;
+			case "number":
+				return (
+					<NumberWidget source={widget.source} unit={widget.unit} />
+				);
+			case "timer":
+				return (
+					<TimerWidget
+						isRunning={isTimerRunning}
+						startTime={timerStartTime}
+						onStart={handleTimerStart}
+						onStop={handleTimerStop}
+						onReset={handleTimerReset}
+					/>
+				);
 			default:
 				return <div>Unknown widget type</div>;
 		}

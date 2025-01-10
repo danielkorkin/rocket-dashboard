@@ -11,6 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 	const [editedWidget, setEditedWidget] = useState({ ...widget });
@@ -62,7 +69,8 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 							</div>
 						)}
 						{(widget.type === "gauge" ||
-							widget.type === "chart") && (
+							widget.type === "chart" ||
+							widget.type === "number") && (
 							<div className="grid grid-cols-4 items-center gap-4">
 								<Label htmlFor="dataKey" className="text-right">
 									Data Key
@@ -75,6 +83,96 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 									className="col-span-3"
 								/>
 							</div>
+						)}
+						{widget.type === "clock" && (
+							<div className="grid grid-cols-4 items-center gap-4">
+								<Label
+									htmlFor="timezone"
+									className="text-right"
+								>
+									Timezone
+								</Label>
+								<Select
+									value={editedWidget.timezone}
+									onValueChange={(value) =>
+										setEditedWidget({
+											...editedWidget,
+											timezone: value,
+										})
+									}
+								>
+									<SelectTrigger className="col-span-3">
+										<SelectValue placeholder="Select timezone" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="UTC">UTC</SelectItem>
+										<SelectItem value="America/New_York">
+											Eastern Time
+										</SelectItem>
+										<SelectItem value="America/Chicago">
+											Central Time
+										</SelectItem>
+										<SelectItem value="America/Denver">
+											Mountain Time
+										</SelectItem>
+										<SelectItem value="America/Los_Angeles">
+											Pacific Time
+										</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+						)}
+						{widget.type === "timer" && (
+							<>
+								<div className="grid grid-cols-4 items-center gap-4">
+									<Label
+										htmlFor="startDate"
+										className="text-right"
+									>
+										Start Date
+									</Label>
+									<Input
+										id="startDate"
+										name="startDate"
+										type="date"
+										value={editedWidget.startDate}
+										onChange={handleChange}
+										className="col-span-3"
+									/>
+								</div>
+								<div className="grid grid-cols-4 items-center gap-4">
+									<Label
+										htmlFor="startTime"
+										className="text-right"
+									>
+										Start Time
+									</Label>
+									<Input
+										id="startTime"
+										name="startTime"
+										type="time"
+										step="0.001"
+										value={editedWidget.startTime}
+										onChange={handleChange}
+										className="col-span-3"
+									/>
+								</div>
+								<div className="grid grid-cols-4 items-center gap-4">
+									<Label
+										htmlFor="timerTimezone"
+										className="text-right"
+									>
+										Timezone
+									</Label>
+									<Input
+										id="timerTimezone"
+										name="timerTimezone"
+										value={editedWidget.timerTimezone}
+										onChange={handleChange}
+										className="col-span-3"
+									/>
+								</div>
+							</>
 						)}
 					</div>
 					<DialogFooter>

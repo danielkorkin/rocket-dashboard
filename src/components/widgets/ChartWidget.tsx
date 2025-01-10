@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { useData } from "../DataProvider";
 
-const ChartWidget = ({ dataKey }) => {
+const ChartWidget = ({ dataKey, unit = "" }) => {
 	const [chartData, setChartData] = useState([]);
 	const currentData = useData();
 
@@ -42,6 +42,7 @@ const ChartWidget = ({ dataKey }) => {
 					labelFormatter={(time) =>
 						new Date(time).toLocaleTimeString()
 					}
+					formatter={(value) => [`${value} ${unit}`, dataKey]}
 				/>
 				<Line type="monotone" dataKey={dataKey} stroke="#8884d8" />
 			</LineChart>

@@ -11,6 +11,9 @@ export const DataProvider = ({ children }) => {
 		speed: 0,
 		altitude: 0,
 		gForce: 0,
+		rollRate: 0,
+		heading: 0,
+		temperature: 0,
 	});
 
 	useEffect(() => {
@@ -23,6 +26,12 @@ export const DataProvider = ({ children }) => {
 					10000
 				),
 				gForce: Math.min(prevData.gForce + Math.random(), 5),
+				rollRate: (prevData.rollRate + Math.random() * 10 - 5) % 360,
+				heading: (prevData.heading + Math.random() * 5) % 360,
+				temperature: Math.min(
+					Math.max(prevData.temperature + Math.random() * 2 - 1, -50),
+					50
+				),
 			}));
 		}, 1000);
 

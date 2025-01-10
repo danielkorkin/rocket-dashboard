@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -13,13 +12,18 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const initialLayouts = {
 	lg: [
-		{ i: "video", x: 0, y: 0, w: 6, h: 4 },
-		{ i: "speed", x: 6, y: 0, w: 2, h: 2 },
-		{ i: "altitude", x: 8, y: 0, w: 2, h: 2 },
-		{ i: "gforce", x: 10, y: 0, w: 2, h: 2 },
-		{ i: "speedChart", x: 0, y: 4, w: 4, h: 3 },
-		{ i: "gforceChart", x: 4, y: 4, w: 4, h: 3 },
-		{ i: "altitudeChart", x: 8, y: 4, w: 4, h: 3 },
+		{ i: "video", x: 0, y: 0, w: 6, h: 4, minW: 4, minH: 3 },
+		{ i: "speed", x: 6, y: 0, w: 2, h: 2, minW: 2, minH: 2 },
+		{ i: "altitude", x: 8, y: 0, w: 2, h: 2, minW: 2, minH: 2 },
+		{ i: "gforce", x: 10, y: 0, w: 2, h: 2, minW: 2, minH: 2 },
+		{ i: "speedChart", x: 0, y: 4, w: 4, h: 3, minW: 3, minH: 2 },
+		{ i: "gforceChart", x: 4, y: 4, w: 4, h: 3, minW: 3, minH: 2 },
+		{ i: "altitudeChart", x: 8, y: 4, w: 4, h: 3, minW: 3, minH: 2 },
+		{ i: "rollRate", x: 0, y: 7, w: 2, h: 2, minW: 2, minH: 2 },
+		{ i: "heading", x: 2, y: 7, w: 4, h: 2, minW: 3, minH: 2 },
+		{ i: "clock", x: 6, y: 7, w: 2, h: 2, minW: 2, minH: 2 },
+		{ i: "temperature", x: 8, y: 7, w: 2, h: 2, minW: 2, minH: 2 },
+		{ i: "timer", x: 10, y: 7, w: 2, h: 2, minW: 2, minH: 2 },
 	],
 };
 
@@ -32,37 +36,54 @@ export default function Dashboard() {
 			type: "gauge",
 			title: "Current Speed",
 			dataKey: "speed",
+			unit: "m/s",
 		},
 		{
 			id: "altitude",
 			type: "gauge",
 			title: "Current Altitude",
 			dataKey: "altitude",
+			unit: "m",
 		},
 		{
 			id: "gforce",
 			type: "gauge",
 			title: "Current G Force",
 			dataKey: "gForce",
+			unit: "g",
 		},
 		{
 			id: "speedChart",
 			type: "chart",
 			title: "Speed Chart",
 			dataKey: "speed",
+			unit: "m/s",
 		},
 		{
 			id: "gforceChart",
 			type: "chart",
 			title: "G Force Chart",
 			dataKey: "gForce",
+			unit: "g",
 		},
 		{
 			id: "altitudeChart",
 			type: "chart",
 			title: "Altitude Chart",
 			dataKey: "altitude",
+			unit: "m",
 		},
+		{ id: "rollRate", type: "rollRate", title: "Roll Rate" },
+		{ id: "heading", type: "heading", title: "Heading" },
+		{ id: "clock", type: "clock", title: "Mission Clock", timezone: "UTC" },
+		{
+			id: "temperature",
+			type: "number",
+			title: "Temperature",
+			source: "temperature",
+			unit: "°C",
+		},
+		{ id: "timer", type: "timer", title: "Mission Timer" },
 	]);
 
 	const onLayoutChange = (layout, layouts) => {
@@ -77,7 +98,10 @@ export default function Dashboard() {
 		]);
 		setLayouts({
 			...layouts,
-			lg: [...layouts.lg, { i: newId, x: 0, y: 0, w: 4, h: 3 }],
+			lg: [
+				...layouts.lg,
+				{ i: newId, x: 0, y: 0, w: 4, h: 3, minW: 2, minH: 2 },
+			],
 		});
 	};
 
