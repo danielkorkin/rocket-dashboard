@@ -77,11 +77,10 @@ const WidgetContainer: React.FC<WidgetContainerProps> = ({
 			case "timer":
 				return (
 					<TimerWidget
-						isRunning={isTimerRunning}
-						startTime={timerStartTime}
-						onStart={handleTimerStart}
-						onStop={handleTimerStop}
-						onReset={handleTimerReset}
+						isRunning={widget.startTime !== null}
+						startTime={
+							widget.startTime ? new Date(widget.startTime) : null
+						}
 					/>
 				);
 			default:

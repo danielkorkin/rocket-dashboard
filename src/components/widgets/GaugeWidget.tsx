@@ -33,7 +33,7 @@ const GaugeWidget = ({ dataKey, min = 0, max = 100, unit = "" }) => {
 						transform="rotate(-90 50 50)"
 					/>
 				</svg>
-				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold">
+				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold">
 					{value.toFixed(1)} {unit}
 				</div>
 			</div>

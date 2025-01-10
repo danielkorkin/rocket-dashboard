@@ -18,6 +18,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { format } from "date-fns";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 
 const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 	const [editedWidget, setEditedWidget] = useState({ ...widget });
@@ -28,6 +30,19 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
+		if (
+			editedWidget.type === "timer" &&
+			editedWidget.startDate &&
+			editedWidget.startTime
+		) {
+			const dateTimeString = `${editedWidget.startDate}T${editedWidget.startTime}`;
+			const date = new Date(dateTimeString);
+			const zonedDate = toZonedTime(
+				date,
+				editedWidget.timerTimezone || "UTC"
+			);
+			editedWidget.startTime = zonedDate;
+		}
 		onUpdate(editedWidget);
 	};
 
@@ -135,7 +150,7 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 										id="startDate"
 										name="startDate"
 										type="date"
-										value={editedWidget.startDate}
+										value={editedWidget.startDate || ""}
 										onChange={handleChange}
 										className="col-span-3"
 									/>
@@ -152,7 +167,7 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 										name="startTime"
 										type="time"
 										step="0.001"
-										value={editedWidget.startTime}
+										value={editedWidget.startTime || ""}
 										onChange={handleChange}
 										className="col-span-3"
 									/>
@@ -167,10 +182,48 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 									<Input
 										id="timerTimezone"
 										name="timerTimezone"
-										value={editedWidget.timerTimezone}
+										value={editedWidget.timerTimezone || ""}
 										onChange={handleChange}
 										className="col-span-3"
 									/>
+								</div>
+								<div className="grid grid-cols-4 items-center gap-4">
+									<Label className="text-right">
+										Timer Control
+									</Label>
+									<div className="col-span-3 flex space-x-2">
+										<Button
+											type="button"
+											onClick={() => {
+												const now = new Date();
+												setEditedWidget({
+													...editedWidget,
+													startDate: format(
+														now,
+														"yyyy-MM-dd"
+													),
+													startTime: format(
+														now,
+														"HH:mm:ss.SSS"
+													),
+												});
+											}}
+										>
+											Start
+										</Button>
+										<Button
+											type="button"
+											onClick={() => {
+												setEditedWidget({
+													...editedWidget,
+													startDate: "",
+													startTime: "",
+												});
+											}}
+										>
+											Reset
+										</Button>
+									</div>
 								</div>
 							</>
 						)}

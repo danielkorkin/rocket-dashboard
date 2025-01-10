@@ -28,6 +28,21 @@ const AddWidgetButton = ({ onAdd }) => {
 				<DropdownMenuItem onSelect={() => onAdd("chart")}>
 					Chart Widget
 				</DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => onAdd("rollRate")}>
+					Roll Rate Widget
+				</DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => onAdd("heading")}>
+					Heading Widget
+				</DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => onAdd("clock")}>
+					Live Clock Widget
+				</DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => onAdd("number")}>
+					Number Widget
+				</DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => onAdd("timer")}>
+					Timer Widget
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
