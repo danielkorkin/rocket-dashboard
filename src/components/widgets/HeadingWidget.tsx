@@ -1,14 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useData } from "../DataProvider";
 
 const HeadingWidget: React.FC = () => {
-	const data = useData();
 	const [heading, setHeading] = useState(0);
+	const { data } = useData();
+
+	const updateHeading = useCallback(() => {
+		const value = data.heading;
+		if (typeof value !== "undefined") {
+			setHeading(value);
+		}
+	}, [data.heading]);
 
 	useEffect(() => {
-		setHeading(data.heading || 0);
+		updateHeading();
 	}, [data.heading]);
 
 	const compassPoints = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];

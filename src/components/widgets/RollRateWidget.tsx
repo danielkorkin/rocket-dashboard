@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useData } from "../DataProvider";
 
 interface RollRateWidgetProps {
@@ -8,11 +8,18 @@ interface RollRateWidgetProps {
 }
 
 const RollRateWidget: React.FC<RollRateWidgetProps> = ({ unit = "°/s" }) => {
-	const data = useData();
 	const [rotation, setRotation] = useState(0);
+	const { data } = useData();
+
+	const updateRotation = useCallback(() => {
+		const value = data.rollRate;
+		if (typeof value !== "undefined") {
+			setRotation(value);
+		}
+	}, [data.rollRate]);
 
 	useEffect(() => {
-		setRotation(data.rollRate || 0);
+		updateRotation();
 	}, [data.rollRate]);
 
 	return (

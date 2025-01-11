@@ -58,7 +58,10 @@ const WidgetContainer: React.FC<WidgetContainerProps> = ({
 				return <LiveClockWidget timezone={widget.timezone || "UTC"} />;
 			case "number":
 				return (
-					<NumberWidget source={widget.source} unit={widget.unit} />
+					<NumberWidget
+						dataKey={widget.source || widget.dataKey}
+						unit={widget.unit}
+					/>
 				);
 			case "timer":
 				return (
