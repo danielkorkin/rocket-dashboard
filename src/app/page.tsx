@@ -78,8 +78,19 @@ export default function Dashboard() {
 			dataKey: "altitude",
 			unit: "m",
 		},
-		{ id: "rollRate", type: "rollRate", title: "Roll Rate", unit: "°/s" },
-		{ id: "heading", type: "heading", title: "Heading" },
+		{
+			id: "rollRate",
+			type: "rollRate",
+			title: "Roll Rate",
+			dataKey: "rollRate",
+			unit: "°/s",
+		},
+		{
+			id: "heading",
+			type: "heading",
+			title: "Heading",
+			dataKey: "heading",
+		},
 		{ id: "clock", type: "clock", title: "Mission Clock", timezone: "UTC" },
 		{
 			id: "temperature",
@@ -165,7 +176,7 @@ export default function Dashboard() {
 	};
 
 	return (
-		<DataProvider>
+		<DataProvider widgets={widgets}>
 			<div className="p-4">
 				<div
 					className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"

@@ -16,12 +16,12 @@ import { Label } from "@/components/ui/label";
 import { useData } from "./DataProvider";
 
 export function DataSetup() {
-	const { setWebSocketUrl } = useData();
-	const [url, setUrl] = useState("");
+	const { setBaseUrl: setContextBaseUrl } = useData();
+	const [localBaseUrl, setLocalBaseUrl] = useState("");
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setWebSocketUrl(url);
+		setContextBaseUrl(localBaseUrl);
 	};
 
 	return (
@@ -33,24 +33,23 @@ export function DataSetup() {
 				<DialogHeader>
 					<DialogTitle>Data Setup</DialogTitle>
 					<DialogDescription>
-						Configure the WebSocket connection to receive live data
+						Configure the base WebSocket URL to receive live data
 						from rockets.
 					</DialogDescription>
 				</DialogHeader>
 				<form onSubmit={handleSubmit}>
 					<div className="grid gap-4 py-4">
 						<div className="grid grid-cols-4 items-center gap-4">
-							<Label
-								htmlFor="websocket-url"
-								className="text-right"
-							>
-								WebSocket URL
+							<Label htmlFor="base-url" className="text-right">
+								Base URL
 							</Label>
 							<Input
-								id="websocket-url"
-								value={url}
-								onChange={(e) => setUrl(e.target.value)}
-								placeholder="ws://localhost:8080"
+								id="base-url"
+								value={localBaseUrl}
+								onChange={(e) =>
+									setLocalBaseUrl(e.target.value)
+								}
+								placeholder="ws://localhost:5000"
 								className="col-span-3"
 							/>
 						</div>
@@ -64,12 +63,13 @@ export function DataSetup() {
 					<ol className="list-decimal list-inside text-sm">
 						<li>Ensure your local WebSocket server is running</li>
 						<li>
-							Enter the WebSocket URL (e.g., ws://localhost:8080)
+							Enter the base WebSocket URL (e.g.,
+							ws://localhost:5000)
 						</li>
 						<li>Click "Save changes" to connect</li>
 						<li>
 							The dashboard will now receive live data from the
-							WebSocket
+							WebSockets
 						</li>
 					</ol>
 				</div>

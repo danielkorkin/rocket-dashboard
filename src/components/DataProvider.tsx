@@ -6,87 +6,72 @@ const DataContext = createContext(null);
 
 export const useData = () => useContext(DataContext);
 
-export const DataProvider = ({ children }) => {
-	const [data, setData] = useState({
-		speed: 0,
-		altitude: 0,
-		gForce: 0,
-		rollRate: 0,
-		heading: 0,
-		temperature: 0,
-	});
-	const [webSocketUrl, setWebSocketUrl] = useState("");
+export const DataProvider = ({ children, widgets }) => {
+	const [data, setData] = useState({});
+	const [baseUrl, setBaseUrl] = useState("");
+	const [webSockets, setWebSockets] = useState({});
 
 	useEffect(() => {
-		let ws: WebSocket | null = null;
-		let interval: NodeJS.Timeout | null = null;
+		if (!baseUrl) return;
 
-		const connectWebSocket = () => {
-			if (webSocketUrl) {
-				ws = new WebSocket(webSocketUrl);
+		// Detect data keys from widgets
+		const dataKeys = widgets
+			.filter((widget) => widget.dataKey || widget.source)
+			.map((widget) => widget.dataKey || widget.source);
 
-				ws.onopen = () => {
-					console.log("WebSocket connected");
-				};
+		// Close existing WebSockets
+		Object.values(webSockets).forEach((ws) => ws.close());
 
-				ws.onmessage = (event) => {
-					try {
-						const newData = JSON.parse(event.data);
-						setData((prevData) => ({ ...prevData, ...newData }));
-					} catch (error) {
-						console.error("Error parsing WebSocket data:", error);
-					}
-				};
+		// Create new WebSockets for each data key
+		const newWebSockets = {};
+		dataKeys.forEach((dataKey) => {
+			const ws = new WebSocket(`${baseUrl}/${dataKey}`);
 
-				ws.onerror = (error) => {
-					console.error("WebSocket error:", error);
-				};
+			ws.onopen = () => {
+				console.log(`WebSocket connected for ${dataKey}`);
+			};
 
-				ws.onclose = () => {
-					console.log("WebSocket disconnected");
-				};
-			} else {
-				// Fallback to simulated data when no WebSocket URL is provided
-				interval = setInterval(() => {
+			ws.onmessage = (event) => {
+				try {
+					const newData = JSON.parse(event.data);
 					setData((prevData) => ({
-						speed: Math.min(
-							prevData.speed + Math.random() * 10,
-							1000
-						),
-						altitude: Math.min(
-							prevData.altitude + Math.random() * 100,
-							10000
-						),
-						gForce: Math.min(prevData.gForce + Math.random(), 5),
-						rollRate:
-							(prevData.rollRate + Math.random() * 10 - 5) % 360,
-						heading: (prevData.heading + Math.random() * 5) % 360,
-						temperature: Math.min(
-							Math.max(
-								prevData.temperature + Math.random() * 2 - 1,
-								-50
-							),
-							50
-						),
+						...prevData,
+						[dataKey]: newData.value,
 					}));
-				}, 1000);
-			}
-		};
+				} catch (error) {
+					console.error(
+						`Error parsing WebSocket data for ${dataKey}:`,
+						error
+					);
+				}
+			};
 
-		connectWebSocket();
+			ws.onerror = (error) => {
+				console.error(`WebSocket error for ${dataKey}:`, error);
+			};
 
+			ws.onclose = () => {
+				console.log(`WebSocket disconnected for ${dataKey}`);
+				// Attempt to reconnect after 5 seconds
+				setTimeout(() => {
+					const newWs = new WebSocket(`${baseUrl}/${dataKey}`);
+					setWebSockets((prev) => ({ ...prev, [dataKey]: newWs }));
+				}, 5000);
+			};
+
+			newWebSockets[dataKey] = ws;
+		});
+
+		setWebSockets(newWebSockets);
+
+		// Cleanup function
 		return () => {
-			if (ws) {
-				ws.close();
-			}
-			if (interval) {
-				clearInterval(interval);
-			}
+			Object.values(newWebSockets).forEach((ws) => ws.close());
 		};
-	}, [webSocketUrl]);
+	}, [baseUrl, widgets]);
 
 	return (
-		<DataContext.Provider value={{ ...data, setWebSocketUrl }}>
+		<DataContext.Provider value={{ ...data, setBaseUrl }}>
 			{children}
 		</DataContext.Provider>
 	);
