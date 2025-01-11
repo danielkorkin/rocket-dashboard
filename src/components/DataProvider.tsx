@@ -31,11 +31,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({
 
 	const updateData = useCallback((dataKey: string, receivedData: any) => {
 		if (mounted.current) {
-			setData((prev) => ({
-				...prev,
-				[dataKey]: receivedData[dataKey], // Use the specific key from received data
-			}));
-			console.log("Updated data:", dataKey, receivedData[dataKey]); // Debug log
+			setData((prev) => {
+				const newData = {
+					...prev,
+					[dataKey]: receivedData[dataKey],
+				};
+				console.log("Updated data state:", newData); // Debug log
+				return newData;
+			});
 		}
 	}, []);
 

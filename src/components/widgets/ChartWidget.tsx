@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
 	LineChart,
 	Line,
@@ -18,19 +18,29 @@ interface ChartWidgetProps {
 }
 
 const ChartWidget: React.FC<ChartWidgetProps> = ({ dataKey, unit = "" }) => {
-	const [chartData, setChartData] = useState([]);
-	const currentData = useData();
+	const [chartData, setChartData] = useState<Array<any>>([]);
+	const { data } = useData();
+
+	const updateChartData = useCallback(() => {
+		const value = data[dataKey];
+		if (typeof value !== "undefined") {
+			setChartData((prev) => {
+				const newData = [
+					...prev,
+					{
+						time: new Date().getTime(),
+						[dataKey]: value,
+					},
+				];
+				// Keep last 30 data points
+				return newData.slice(-30);
+			});
+		}
+	}, [data, dataKey]);
 
 	useEffect(() => {
-		setChartData((prevData) => {
-			const newData = [
-				...prevData,
-				{ time: new Date().getTime(), [dataKey]: currentData[dataKey] },
-			];
-			if (newData.length > 20) newData.shift();
-			return newData;
-		});
-	}, [currentData, dataKey]);
+		updateChartData();
+	}, [data[dataKey]]); // Only update when the specific dataKey value changes
 
 	return (
 		<ResponsiveContainer width="100%" height={200}>
@@ -43,6 +53,7 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({ dataKey, unit = "" }) => {
 					}
 				/>
 				<YAxis
+					domain={["auto", "auto"]}
 					label={{ value: unit, angle: -90, position: "insideLeft" }}
 				/>
 				<Tooltip
@@ -51,7 +62,13 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({ dataKey, unit = "" }) => {
 					}
 					formatter={(value) => [`${value} ${unit}`, dataKey]}
 				/>
-				<Line type="monotone" dataKey={dataKey} stroke="#8884d8" />
+				<Line
+					type="monotone"
+					dataKey={dataKey}
+					stroke="#8884d8"
+					dot={false}
+					isAnimationActive={false}
+				/>
 			</LineChart>
 		</ResponsiveContainer>
 	);
