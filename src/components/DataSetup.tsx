@@ -13,22 +13,24 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useData } from "./DataProvider";
 
-export function DataSetup({
-	baseUrl,
-	setBaseUrl,
-}: {
-	baseUrl: string;
-	setBaseUrl: React.Dispatch<React.SetStateAction<string>>;
-}) {
+interface DataSetupProps {
+	initialUrl?: string;
+	onSave: (url: string) => void;
+}
+
+export function DataSetup({ initialUrl = "", onSave }: DataSetupProps) {
+	const [url, setUrl] = useState(initialUrl);
+	const [open, setOpen] = useState(false);
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setBaseUrl(baseUrl);
+		onSave(url);
+		setOpen(false);
 	};
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button variant="outline">Data Setup</Button>
 			</DialogTrigger>
@@ -48,8 +50,8 @@ export function DataSetup({
 							</Label>
 							<Input
 								id="base-url"
-								value={baseUrl}
-								onChange={(e) => setBaseUrl(e.target.value)}
+								value={url}
+								onChange={(e) => setUrl(e.target.value)}
 								placeholder="ws://localhost:5000"
 								className="col-span-3"
 							/>
@@ -59,21 +61,6 @@ export function DataSetup({
 						<Button type="submit">Save changes</Button>
 					</DialogFooter>
 				</form>
-				<div className="mt-4">
-					<h4 className="text-sm font-medium">Instructions:</h4>
-					<ol className="list-decimal list-inside text-sm">
-						<li>Ensure your local WebSocket server is running</li>
-						<li>
-							Enter the base WebSocket URL (e.g.,
-							ws://localhost:5000)
-						</li>
-						<li>Click "Save changes" to connect</li>
-						<li>
-							The dashboard will now receive live data from the
-							WebSockets
-						</li>
-					</ol>
-				</div>
 			</DialogContent>
 		</Dialog>
 	);

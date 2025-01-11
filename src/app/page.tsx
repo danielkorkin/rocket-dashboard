@@ -200,7 +200,10 @@ export default function Dashboard() {
 				</h1>
 				<div className="flex justify-between items-center mb-4">
 					<div className="flex items-center space-x-4">
-						<DataSetup />
+						<DataSetup
+							initialUrl={baseUrl}
+							onSave={(url) => setBaseUrl(url)}
+						/>
 						<div className="flex items-center space-x-2">
 							<Switch
 								id="lock-layout"
