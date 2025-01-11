@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
 import { useData } from "../DataProvider";
+import React, { useMemo } from 'react';
 
 interface GaugeWidgetProps {
 	dataKey: string;
@@ -17,10 +17,12 @@ const GaugeWidget: React.FC<GaugeWidgetProps> = ({
 	unit = "",
 }) => {
 	const { data } = useData();
-	const value = Number(data[dataKey] ?? 0); // Ensure numeric value with fallback
-	const percentage = Math.min(
-		100,
-		Math.max(0, ((value - min) / (max - min)) * 100)
+
+	const value = useMemo(() => Number(data[dataKey] ?? 0), [data, dataKey]);
+
+	const percentage = useMemo(
+		() => Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)),
+		[value, min, max]
 	);
 
 	return (

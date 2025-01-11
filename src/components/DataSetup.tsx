@@ -50,7 +50,7 @@ export function DataSetup({ initialUrl = "", onSave }: DataSetupProps) {
 							</Label>
 							<Input
 								id="base-url"
-								value={url} // Always provide a value
+								value={url}
 								onChange={(e) => setUrl(e.target.value)}
 								placeholder="ws://localhost:5000"
 								className="col-span-3"
