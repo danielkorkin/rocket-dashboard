@@ -31,30 +31,16 @@ interface WidgetContainerProps {
 	};
 	onRemove: () => void;
 	onUpdate: (newProps: any) => void;
+	isLocked: boolean;
 }
 
 const WidgetContainer: React.FC<WidgetContainerProps> = ({
 	widget,
 	onRemove,
 	onUpdate,
+	isLocked,
 }) => {
 	const [isEditing, setIsEditing] = useState(false);
-	const [isTimerRunning, setIsTimerRunning] = useState(false);
-	const [timerStartTime, setTimerStartTime] = useState<Date | null>(null);
-
-	const handleTimerStart = () => {
-		setIsTimerRunning(true);
-		setTimerStartTime(new Date());
-	};
-
-	const handleTimerStop = () => {
-		setIsTimerRunning(false);
-	};
-
-	const handleTimerReset = () => {
-		setIsTimerRunning(false);
-		setTimerStartTime(null);
-	};
 
 	const renderWidget = () => {
 		switch (widget.type) {
@@ -94,39 +80,41 @@ const WidgetContainer: React.FC<WidgetContainerProps> = ({
 				<CardTitle className="text-sm font-medium">
 					{widget.title}
 				</CardTitle>
-				<div>
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={(e) => {
-							e.stopPropagation();
-							setIsEditing(true);
-						}}
-						onMouseDown={(e) => e.stopPropagation()}
-					>
-						<Settings className="h-4 w-4" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={(e) => {
-							e.stopPropagation();
-							onRemove();
-						}}
-						onMouseDown={(e) => e.stopPropagation()}
-					>
-						<X className="h-4 w-4" />
-					</Button>
-				</div>
+				{!isLocked && (
+					<div>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={(e) => {
+								e.stopPropagation();
+								setIsEditing(true);
+							}}
+							onMouseDown={(e) => e.stopPropagation()}
+						>
+							<Settings className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={(e) => {
+								e.stopPropagation();
+								onRemove();
+							}}
+							onMouseDown={(e) => e.stopPropagation()}
+						>
+							<X className="h-4 w-4" />
+						</Button>
+					</div>
+				)}
 			</CardHeader>
 			<CardContent className="flex-grow relative">
 				{renderWidget()}
 			</CardContent>
-			{isEditing && (
+			{isEditing && !isLocked && (
 				<WidgetEditor
 					widget={widget}
 					onUpdate={(newProps) => {
-						onUpdate(newProps);
+						onUpdate({ ...widget, ...newProps });
 						setIsEditing(false);
 					}}
 					onCancel={() => setIsEditing(false)}

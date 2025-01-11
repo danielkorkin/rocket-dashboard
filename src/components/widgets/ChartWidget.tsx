@@ -12,7 +12,12 @@ import {
 } from "recharts";
 import { useData } from "../DataProvider";
 
-const ChartWidget = ({ dataKey, unit = "" }) => {
+interface ChartWidgetProps {
+	dataKey: string;
+	unit?: string;
+}
+
+const ChartWidget: React.FC<ChartWidgetProps> = ({ dataKey, unit = "" }) => {
 	const [chartData, setChartData] = useState([]);
 	const currentData = useData();
 
@@ -37,7 +42,9 @@ const ChartWidget = ({ dataKey, unit = "" }) => {
 						new Date(time).toLocaleTimeString()
 					}
 				/>
-				<YAxis />
+				<YAxis
+					label={{ value: unit, angle: -90, position: "insideLeft" }}
+				/>
 				<Tooltip
 					labelFormatter={(time) =>
 						new Date(time).toLocaleTimeString()

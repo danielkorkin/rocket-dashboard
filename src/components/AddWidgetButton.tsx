@@ -10,11 +10,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus } from "lucide-react";
 
-const AddWidgetButton = ({ onAdd }) => {
+interface AddWidgetButtonProps {
+	onAdd: (widgetType: string) => void;
+	disabled?: boolean;
+}
+
+const AddWidgetButton: React.FC<AddWidgetButtonProps> = ({
+	onAdd,
+	disabled,
+}) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button className="mb-4">
+				<Button className="mb-4" disabled={disabled}>
 					<Plus className="mr-2 h-4 w-4" /> Add Widget
 				</Button>
 			</DropdownMenuTrigger>

@@ -3,7 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { useData } from "../DataProvider";
 
-const RollRateWidget: React.FC = () => {
+interface RollRateWidgetProps {
+	unit?: string;
+}
+
+const RollRateWidget: React.FC<RollRateWidgetProps> = ({ unit = "°/s" }) => {
 	const data = useData();
 	const [rotation, setRotation] = useState(0);
 
@@ -25,10 +29,11 @@ const RollRateWidget: React.FC = () => {
 				>
 					<div className="w-1 h-full bg-blue-500"></div>
 				</div>
-				<div className="absolute inset-0 flex items-center justify-center">
+				<div className="absolute inset-0 flex flex-col items-center justify-center">
 					<span className="text-lg font-bold">
-						{rotation.toFixed(2)}°/s
+						{rotation.toFixed(2)}
 					</span>
+					<span className="text-sm">{unit}</span>
 				</div>
 			</div>
 		</div>

@@ -19,7 +19,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import { formatInTimeZone, toZonedTime } from "date-fns-tz";
+import { toDate, formatInTimeZone } from "date-fns-tz";
 
 const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 	const [editedWidget, setEditedWidget] = useState({ ...widget });
@@ -36,12 +36,10 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 			editedWidget.startTime
 		) {
 			const dateTimeString = `${editedWidget.startDate}T${editedWidget.startTime}`;
-			const date = new Date(dateTimeString);
-			const zonedDate = toZonedTime(
-				date,
-				editedWidget.timerTimezone || "UTC"
-			);
-			editedWidget.startTime = zonedDate;
+			// Replace zonedTimeToUtc with toDate
+			editedWidget.startTime = toDate(dateTimeString, {
+				timeZone: editedWidget.timerTimezone || "UTC",
+			});
 		}
 		onUpdate(editedWidget);
 	};
@@ -86,14 +84,48 @@ const WidgetEditor = ({ widget, onUpdate, onCancel }) => {
 						{(widget.type === "gauge" ||
 							widget.type === "chart" ||
 							widget.type === "number") && (
+							<>
+								<div className="grid grid-cols-4 items-center gap-4">
+									<Label
+										htmlFor="dataKey"
+										className="text-right"
+									>
+										Data Key
+									</Label>
+									<Input
+										id="dataKey"
+										name="dataKey"
+										value={editedWidget.dataKey}
+										onChange={handleChange}
+										className="col-span-3"
+									/>
+								</div>
+								<div className="grid grid-cols-4 items-center gap-4">
+									<Label
+										htmlFor="unit"
+										className="text-right"
+									>
+										Unit
+									</Label>
+									<Input
+										id="unit"
+										name="unit"
+										value={editedWidget.unit}
+										onChange={handleChange}
+										className="col-span-3"
+									/>
+								</div>
+							</>
+						)}
+						{widget.type === "rollRate" && (
 							<div className="grid grid-cols-4 items-center gap-4">
-								<Label htmlFor="dataKey" className="text-right">
-									Data Key
+								<Label htmlFor="unit" className="text-right">
+									Unit
 								</Label>
 								<Input
-									id="dataKey"
-									name="dataKey"
-									value={editedWidget.dataKey}
+									id="unit"
+									name="unit"
+									value={editedWidget.unit}
 									onChange={handleChange}
 									className="col-span-3"
 								/>

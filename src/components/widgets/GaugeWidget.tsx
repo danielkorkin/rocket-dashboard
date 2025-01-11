@@ -3,7 +3,19 @@
 import React from "react";
 import { useData } from "../DataProvider";
 
-const GaugeWidget = ({ dataKey, min = 0, max = 100, unit = "" }) => {
+interface GaugeWidgetProps {
+	dataKey: string;
+	min?: number;
+	max?: number;
+	unit?: string;
+}
+
+const GaugeWidget: React.FC<GaugeWidgetProps> = ({
+	dataKey,
+	min = 0,
+	max = 100,
+	unit = "",
+}) => {
 	const data = useData();
 	const value = data[dataKey] || 0;
 	const percentage = ((value - min) / (max - min)) * 100;
@@ -33,8 +45,9 @@ const GaugeWidget = ({ dataKey, min = 0, max = 100, unit = "" }) => {
 						transform="rotate(-90 50 50)"
 					/>
 				</svg>
-				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold">
-					{value.toFixed(1)} {unit}
+				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+					<div className="text-xl font-bold">{value.toFixed(1)}</div>
+					<div className="text-xs">{unit}</div>
 				</div>
 			</div>
 		</div>
