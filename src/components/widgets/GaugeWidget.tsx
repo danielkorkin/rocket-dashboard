@@ -1,7 +1,7 @@
 "use client";
 
 import { useData } from "../DataProvider";
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 
 interface GaugeWidgetProps {
 	dataKey: string;
@@ -17,13 +17,22 @@ const GaugeWidget: React.FC<GaugeWidgetProps> = ({
 	unit = "",
 }) => {
 	const { data } = useData();
+	console.log("GaugeWidget data:", data, "dataKey:", dataKey); // Debug log
 
-	const value = useMemo(() => Number(data[dataKey] ?? 0), [data, dataKey]);
+	const value = useMemo(() => {
+		const val = Number(data[dataKey] ?? 0);
+		console.log("GaugeWidget value:", val); // Debug log
+		return val;
+	}, [data, dataKey]);
 
-	const percentage = useMemo(
-		() => Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)),
-		[value, min, max]
-	);
+	const percentage = useMemo(() => {
+		const pct = Math.min(
+			100,
+			Math.max(0, ((value - min) / (max - min)) * 100)
+		);
+		console.log("GaugeWidget percentage:", pct); // Debug log
+		return pct;
+	}, [value, min, max]);
 
 	return (
 		<div className="flex flex-col items-center">

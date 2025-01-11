@@ -29,28 +29,25 @@ export const DataProvider: React.FC<DataProviderProps> = ({
 	const websocketsRef = useRef<Record<string, WebSocket>>({});
 	const mounted = useRef(true);
 
-	const updateData = useCallback((dataKey: string, value: any) => {
+	const updateData = useCallback((dataKey: string, receivedData: any) => {
 		if (mounted.current) {
 			setData((prev) => ({
 				...prev,
-				[dataKey]: value,
+				[dataKey]: receivedData[dataKey], // Use the specific key from received data
 			}));
+			console.log("Updated data:", dataKey, receivedData[dataKey]); // Debug log
 		}
 	}, []);
 
 	useEffect(() => {
 		mounted.current = true;
 
-		if (!baseUrl) {
-			console.log("No baseUrl provided, skipping WebSocket connections");
-			return;
-		}
+		if (!baseUrl) return;
 
 		// Clean up existing connections
 		Object.values(websocketsRef.current).forEach((ws) => ws.close());
 		websocketsRef.current = {};
 
-		// Get unique data keys
 		const dataKeys = [
 			...new Set(
 				widgets
@@ -61,7 +58,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({
 
 		console.log("Connecting to WebSockets for keys:", dataKeys);
 
-		// Create new connections
 		dataKeys.forEach((dataKey) => {
 			if (!dataKey) return;
 
@@ -70,36 +66,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({
 
 			const ws = new WebSocket(wsUrl);
 
-			ws.onopen = () => {
-				console.log(`Connected to ${wsUrl}`);
-			};
-
 			ws.onmessage = (event) => {
 				try {
 					const newData = JSON.parse(event.data);
 					console.log(`Received data for ${dataKey}:`, newData);
-					updateData(dataKey, newData.value);
+					updateData(dataKey, newData);
 				} catch (error) {
 					console.error(`Error parsing data for ${dataKey}:`, error);
-				}
-			};
-
-			ws.onerror = (error) => {
-				console.error(`WebSocket error for ${dataKey}:`, error);
-			};
-
-			ws.onclose = (event) => {
-				console.log(
-					`WebSocket closed for ${dataKey}:`,
-					event.code,
-					event.reason
-				);
-				// Implement reconnection logic if needed
-				if (mounted.current) {
-					setTimeout(() => {
-						console.log(`Attempting to reconnect ${dataKey}...`);
-						// Reconnection logic here
-					}, 5000);
 				}
 			};
 
@@ -107,17 +80,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({
 		});
 
 		return () => {
-			console.log("Cleaning up WebSocket connections");
 			mounted.current = false;
 			Object.values(websocketsRef.current).forEach((ws) => ws.close());
 			websocketsRef.current = {};
 		};
 	}, [baseUrl, widgets, updateData]);
 
-	const value = useMemo(() => ({ data }), [data]);
+	const contextValue = useMemo(() => ({ data }), [data]);
 
 	return (
-		<DataContext.Provider value={value}>{children}</DataContext.Provider>
+		<DataContext.Provider value={contextValue}>
+			{children}
+		</DataContext.Provider>
 	);
 };
 
