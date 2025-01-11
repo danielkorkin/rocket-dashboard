@@ -15,13 +15,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useData } from "./DataProvider";
 
-export function DataSetup() {
-	const { setBaseUrl: setContextBaseUrl } = useData();
-	const [localBaseUrl, setLocalBaseUrl] = useState("");
-
+export function DataSetup({
+	baseUrl,
+	setBaseUrl,
+}: {
+	baseUrl: string;
+	setBaseUrl: React.Dispatch<React.SetStateAction<string>>;
+}) {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setContextBaseUrl(localBaseUrl);
+		setBaseUrl(baseUrl);
 	};
 
 	return (
@@ -45,10 +48,8 @@ export function DataSetup() {
 							</Label>
 							<Input
 								id="base-url"
-								value={localBaseUrl}
-								onChange={(e) =>
-									setLocalBaseUrl(e.target.value)
-								}
+								value={baseUrl}
+								onChange={(e) => setBaseUrl(e.target.value)}
 								placeholder="ws://localhost:5000"
 								className="col-span-3"
 							/>

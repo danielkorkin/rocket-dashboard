@@ -102,6 +102,7 @@ export default function Dashboard() {
 		{ id: "timer", type: "timer", title: "Mission Timer" },
 	]);
 	const [isLayoutLocked, setIsLayoutLocked] = useState(false);
+	const [baseUrl, setBaseUrl] = useState("");
 
 	const onLayoutChange = (layout, layouts) => {
 		if (!isLayoutLocked) {
@@ -147,7 +148,7 @@ export default function Dashboard() {
 	};
 
 	const exportLayout = () => {
-		const data = JSON.stringify({ layouts, widgets });
+		const data = JSON.stringify({ layouts, widgets, baseUrl });
 		const blob = new Blob([data], { type: "application/json" });
 		const url = URL.createObjectURL(blob);
 		const link = document.createElement("a");
@@ -166,6 +167,7 @@ export default function Dashboard() {
 						const importedData = JSON.parse(e.target.result);
 						setLayouts(importedData.layouts);
 						setWidgets(importedData.widgets);
+						setBaseUrl(importedData.baseUrl);
 					} catch (error) {
 						console.error("Error importing layout:", error);
 					}
@@ -176,7 +178,11 @@ export default function Dashboard() {
 	};
 
 	return (
-		<DataProvider widgets={widgets}>
+		<DataProvider
+			widgets={widgets}
+			baseUrl={baseUrl}
+			setBaseUrl={setBaseUrl}
+		>
 			<div className="p-4">
 				<div
 					className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"

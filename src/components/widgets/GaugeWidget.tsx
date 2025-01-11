@@ -16,7 +16,7 @@ const GaugeWidget: React.FC<GaugeWidgetProps> = ({
 	max = 100,
 	unit = "",
 }) => {
-	const data = useData();
+	const { data } = useData();
 	const value = data[dataKey] || 0;
 	const percentage = ((value - min) / (max - min)) * 100;
 
