@@ -17,8 +17,11 @@ const GaugeWidget: React.FC<GaugeWidgetProps> = ({
 	unit = "",
 }) => {
 	const { data } = useData();
-	const value = data[dataKey] || 0;
-	const percentage = ((value - min) / (max - min)) * 100;
+	const value = Number(data[dataKey] ?? 0); // Ensure numeric value with fallback
+	const percentage = Math.min(
+		100,
+		Math.max(0, ((value - min) / (max - min)) * 100)
+	);
 
 	return (
 		<div className="flex flex-col items-center">

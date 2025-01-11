@@ -20,12 +20,12 @@ interface DataSetupProps {
 }
 
 export function DataSetup({ initialUrl = "", onSave }: DataSetupProps) {
-	const [url, setUrl] = useState(initialUrl);
+	const [url, setUrl] = useState(initialUrl || ""); // Ensure initial value is always a string
 	const [open, setOpen] = useState(false);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		onSave(url);
+		onSave(url.trim()); // Trim whitespace
 		setOpen(false);
 	};
 
@@ -50,7 +50,7 @@ export function DataSetup({ initialUrl = "", onSave }: DataSetupProps) {
 							</Label>
 							<Input
 								id="base-url"
-								value={url}
+								value={url} // Always provide a value
 								onChange={(e) => setUrl(e.target.value)}
 								placeholder="ws://localhost:5000"
 								className="col-span-3"

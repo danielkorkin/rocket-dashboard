@@ -8,25 +8,60 @@ import React, {
 	useCallback,
 } from "react";
 
-const DataContext = createContext(null);
+interface DataProviderProps {
+	children: React.ReactNode;
+	widgets: any[];
+	baseUrl: string;
+}
 
-export const useData = () => useContext(DataContext);
+interface DataContextType {
+	data: Record<string, any>;
+}
 
-export const DataProvider = ({ children, widgets }) => {
-	const [data, setData] = useState({});
-	const [baseUrl, setBaseUrl] = useState("");
-	const [webSockets, setWebSockets] = useState({});
+const DataContext = createContext<DataContextType>({ data: {} });
+export const useData = () => {
+	const context = useContext(DataContext);
+	if (!context) {
+		throw new Error("useData must be used within a DataProvider");
+	}
+	return { data: context.data || {} }; // Ensure data is never undefined
+};
 
-	const updateData = useCallback((dataKey, value) => {
-		setData((prevData) => {
-			const newData = { ...prevData, [dataKey]: value };
-			return newData;
-		});
+export const DataProvider: React.FC<DataProviderProps> = ({
+	children,
+	widgets,
+	baseUrl,
+}) => {
+	const [data, setData] = useState<Record<string, any>>(() => {
+		const initialData: Record<string, any> = {};
+		widgets
+			.filter((widget) => widget.dataKey || widget.source)
+			.forEach((widget) => {
+				const key = widget.dataKey || widget.source;
+				if (key) initialData[key] = 0;
+			});
+		return initialData;
+	});
+	const [webSockets, setWebSockets] = useState<Record<string, WebSocket>>({});
+	const [connectionStatus, setConnectionStatus] = useState<
+		Record<string, boolean>
+	>({});
+
+	const updateData = useCallback((dataKey: string, value: any) => {
+		console.log(`Updating data for ${dataKey}:`, value);
+		setData((prev) => ({
+			...prev,
+			[dataKey]: value,
+		}));
 	}, []);
 
 	useEffect(() => {
 		if (!baseUrl) return;
 
+		// Clean up existing connections
+		Object.values(webSockets).forEach((ws) => ws.close());
+
+		// Get unique data keys from widgets
 		const dataKeys = [
 			...new Set(
 				widgets
@@ -35,58 +70,70 @@ export const DataProvider = ({ children, widgets }) => {
 			),
 		];
 
-		Object.values(webSockets).forEach((ws) => ws.close());
+		console.log("Creating WebSocket connections for:", dataKeys); // Debug log
 
-		const newWebSockets = {};
+		// Create new connections
+		const newWebSockets: Record<string, WebSocket> = {};
+		const newConnectionStatus: Record<string, boolean> = {};
+
 		dataKeys.forEach((dataKey) => {
-			if (!newWebSockets[dataKey]) {
-				const ws = new WebSocket(`${baseUrl}/${dataKey}`);
+			if (!dataKey) return;
 
-				ws.onopen = () => {
-					console.log(`WebSocket connected for ${dataKey}`);
-				};
+			const wsUrl = `${baseUrl}/${dataKey}`;
+			console.log(`Connecting to WebSocket: ${wsUrl}`); // Debug log
 
-				ws.onmessage = (event) => {
-					try {
-						const newData = JSON.parse(event.data);
-						updateData(dataKey, newData.value);
-					} catch (error) {
-						console.error(
-							`Error parsing WebSocket data for ${dataKey}:`,
-							error
-						);
-					}
-				};
+			const ws = new WebSocket(wsUrl);
 
-				ws.onerror = (error) => {
-					console.error(`WebSocket error for ${dataKey}:`, error);
-				};
+			ws.onopen = () => {
+				console.log(`Connected to ${dataKey}`);
+				newConnectionStatus[dataKey] = true;
+				setConnectionStatus((prev) => ({
+					...prev,
+					[dataKey]: true,
+				}));
+			};
 
-				ws.onclose = () => {
-					console.log(`WebSocket disconnected for ${dataKey}`);
-					setTimeout(() => {
-						const newWs = new WebSocket(`${baseUrl}/${dataKey}`);
-						setWebSockets((prev) => ({
-							...prev,
-							[dataKey]: newWs,
-						}));
-					}, 5000);
-				};
+			ws.onmessage = (event) => {
+				try {
+					const newData = JSON.parse(event.data);
+					console.log(`Received data for ${dataKey}:`, newData); // Debug log
+					updateData(dataKey, newData.value);
+				} catch (error) {
+					console.error(`Error parsing data for ${dataKey}:`, error);
+				}
+			};
 
-				newWebSockets[dataKey] = ws;
-			}
+			ws.onerror = (error) => {
+				console.error(`WebSocket error for ${dataKey}:`, error);
+				newConnectionStatus[dataKey] = false;
+				setConnectionStatus((prev) => ({
+					...prev,
+					[dataKey]: false,
+				}));
+			};
+
+			ws.onclose = () => {
+				console.log(`Connection closed for ${dataKey}`);
+				newConnectionStatus[dataKey] = false;
+				setConnectionStatus((prev) => ({
+					...prev,
+					[dataKey]: false,
+				}));
+			};
+
+			newWebSockets[dataKey] = ws;
 		});
 
 		setWebSockets(newWebSockets);
+		setConnectionStatus(newConnectionStatus);
 
 		return () => {
+			console.log("Cleaning up WebSocket connections");
 			Object.values(newWebSockets).forEach((ws) => ws.close());
 		};
 	}, [baseUrl, widgets, updateData]);
 
 	return (
-		<DataContext.Provider value={{ data, setBaseUrl }}>
-			{children}
-		</DataContext.Provider>
+		<DataContext.Provider value={{ data }}>{children}</DataContext.Provider>
 	);
 };
